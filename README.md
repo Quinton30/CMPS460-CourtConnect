@@ -1,105 +1,98 @@
-# CourtConnect
+# CourtConnect - Module 5
 
 **Student:** Quinton Alexandre  
 **Course:** CMPS 460 Mobile Application Development  
-**Assignment:** Module 4 Homework - Build Your Own Multi-Screen Application
+**Assignment:** Module 5 Homework - Add Data & Persistent Storage
 
 ## Application Description
 
-CourtConnect is a multi-screen React Native basketball court guide. The application lets users browse five sample basketball locations, compare basic information, and select a court to open a detailed view. It was designed to demonstrate React Navigation, native stack navigation, TypeScript navigation types, touchable navigation elements, and navigation parameters.
+CourtConnect is a multi-screen React Native basketball court guide. The Module 5 version adds a personal saved-court collection. Users can view the collection in a FlatList, enter a new court through a validated form, delete an existing court, and return later to find their data still saved on the device.
 
-## Screens
+## Module 5 Data Model
 
-1. **Home Screen** - Displays the application title, introduction, and buttons that navigate to the court list and About screen.
-2. **List Screen** - Displays five basketball courts. Each item includes the court name, neighborhood, surface, and court type.
-3. **Details Screen** - Displays information about the selected court. The complete court object is passed to this screen through navigation parameters.
-4. **About Screen** - Displays Quinton Alexandre's name, an application description, and the application's purpose.
+Each saved court follows the `SavedCourt` TypeScript interface and contains:
 
-## Technical Requirements Met
+- `id` - a unique identifier
+- `name` - the court name
+- `neighborhood` - the court location
+- `surface` - the type of playing surface
 
-- React Native with TypeScript
-- React Navigation with Native Stack Navigation
-- Four screens: Home, Courts, Details, and About
-- Pressable components for navigation
-- Five list items containing multiple pieces of information
-- Selected court data passed to the Details screen through navigation parameters
-- StyleSheet styling with colors, spacing, typography, borders, and rounded corners
-- Scrollable screens for smaller Android devices
+## Module 5 Requirements Met
+
+- TypeScript `SavedCourt` interface with four properties and a unique id
+- Collection stored as an array of TypeScript objects with `useState`
+- Collection displayed with `FlatList`
+- Court name, neighborhood, and surface displayed for every item
+- Add Court screen with three `TextInput` fields
+- Required-field validation and a visible error message
+- Delete button for every saved court
+- Empty-state message when the collection has no items
+- AsyncStorage loading when the app starts
+- AsyncStorage saving whenever the collection changes
+- `JSON.parse()` used while loading and `JSON.stringify()` used while saving
+- React Navigation integrated with the original multi-screen application
+- StyleSheet styling
 
 ## Required Packages
 
-Install the stable React Navigation packages and their React Native dependencies:
+From the CourtConnect project folder, install AsyncStorage:
+
+```text
+npm.cmd install @react-native-async-storage/async-storage
+```
+
+The Module 4 navigation packages must also remain installed:
 
 ```text
 npm.cmd install @react-navigation/native @react-navigation/native-stack react-native-screens react-native-safe-area-context
 ```
 
-## Windows Setup Instructions
+## How to Use These Files
 
-### 1. Create the React Native project
-
-Open a Command Prompt or the VS Code terminal and enter each command separately:
-
-```text
-cd C:\RN
-```
-
-```text
-npx.cmd @react-native-community/cli@latest init CourtConnect
-```
-
-```text
-cd CourtConnect
-```
-
-### 2. Install React Navigation
-
-```text
-npm.cmd install @react-navigation/native @react-navigation/native-stack react-native-screens react-native-safe-area-context
-```
-
-### 3. Replace App.tsx
-
-Copy the `App.tsx` file from this package into:
-
-```text
-C:\RN\CourtConnect\App.tsx
-```
-
-Choose **Replace the file in the destination** if Windows asks.
-
-### 4. Open the project in Visual Studio Code
-
-```text
-code C:\RN\CourtConnect
-```
-
-### 5. Run the application
-
-Start the Android Emulator first. Close any older Metro terminal that is using port 8081, and then run:
-
-```text
-cd C:\RN\CourtConnect
-```
+1. Copy this `App.tsx` into `C:\RN\CourtConnect`.
+2. Choose **Replace the file in the destination** if Windows asks.
+3. Copy this `README.md` into the same folder and replace the older version.
+4. Open `C:\RN\CourtConnect` in Visual Studio Code.
+5. Open a terminal in VS Code.
+6. Install AsyncStorage using the command above.
+7. Start the Android Emulator.
+8. Run the application:
 
 ```text
 npm.cmd run android
 ```
 
-Keep the Metro terminal open while using the application.
+## Testing Checklist
 
-## Testing and Screenshot Checklist
+1. Open **Saved Courts** and confirm that three starter courts appear.
+2. Open **Add a Court**, leave a field blank, and press **Save Court** to confirm validation appears.
+3. Complete all three fields and press **Save Court**.
+4. Confirm that the new court appears in the list.
+5. Close and reopen the application and confirm the new court is still present.
+6. Delete one court and confirm it disappears.
 
-1. Take a screenshot of the Home screen before pressing any buttons.
-2. Press **Browse Courts** and take a screenshot showing the Court List screen.
-3. Select **Sunset Hoops Center** and take a screenshot of its Details screen.
-4. Return to Home, press **About CourtConnect**, and take a screenshot of the About screen.
-5. Verify that Android's Back button returns to the previous screen without an error.
+## Screenshot Checklist
 
-## GitHub Submission
+1. Take one screenshot of **My Saved Courts** showing the list.
+2. Take one screenshot of the **Add a Court** form.
+3. Add your own fourth court, return to **My Saved Courts**, and take a screenshot showing at least three stored items.
 
-After testing, create a public GitHub repository named `CMPS460-CourtConnect`, commit the complete React Native project, and submit its URL with the four screenshots and the written explanation.
+## GitHub Commands
 
-## Note
+Run each command separately inside `C:\RN\CourtConnect`:
 
-The court names and details are sample information created for this class project.
+```text
+git add .
+```
+
+```text
+git commit -m "Complete CMPS 460 Module 5 persistent storage"
+```
+
+```text
+git push
+```
+
+## Submission Paragraph
+
+CourtConnect stores a personal collection of basketball courts. Each saved court includes a unique identifier, court name, neighborhood, and playing surface. I selected this information because it gives basketball players the most useful details needed to recognize and compare locations. AsyncStorage saves the court array as a JSON string whenever the collection changes, and the application loads and parses that saved information when it starts. This allows added courts and deletions to remain after the application is closed and reopened.

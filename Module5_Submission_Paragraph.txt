@@ -1,0 +1,5 @@
+Quinton Alexandre
+CMPS 460 Mobile Application Development
+Module 5 Homework Assignment
+
+CourtConnect stores a personal collection of basketball courts. Each saved court includes a unique identifier, court name, neighborhood, and playing surface. I selected this information because it gives basketball players the most useful details needed to recognize and compare locations. AsyncStorage saves the court array as a JSON string whenever the collection changes, and the application loads and parses that saved information when it starts. This allows added courts and deletions to remain after the application is closed and reopened.
