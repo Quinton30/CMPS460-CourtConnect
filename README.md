@@ -1,97 +1,105 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# CourtConnect
 
-# Getting Started
+**Student:** Quinton Alexandre  
+**Course:** CMPS 460 Mobile Application Development  
+**Assignment:** Module 4 Homework - Build Your Own Multi-Screen Application
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Application Description
 
-## Step 1: Start Metro
+CourtConnect is a multi-screen React Native basketball court guide. The application lets users browse five sample basketball locations, compare basic information, and select a court to open a detailed view. It was designed to demonstrate React Navigation, native stack navigation, TypeScript navigation types, touchable navigation elements, and navigation parameters.
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## Screens
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+1. **Home Screen** - Displays the application title, introduction, and buttons that navigate to the court list and About screen.
+2. **List Screen** - Displays five basketball courts. Each item includes the court name, neighborhood, surface, and court type.
+3. **Details Screen** - Displays information about the selected court. The complete court object is passed to this screen through navigation parameters.
+4. **About Screen** - Displays Quinton Alexandre's name, an application description, and the application's purpose.
 
-```sh
-# Using npm
-npm start
+## Technical Requirements Met
 
-# OR using Yarn
-yarn start
+- React Native with TypeScript
+- React Navigation with Native Stack Navigation
+- Four screens: Home, Courts, Details, and About
+- Pressable components for navigation
+- Five list items containing multiple pieces of information
+- Selected court data passed to the Details screen through navigation parameters
+- StyleSheet styling with colors, spacing, typography, borders, and rounded corners
+- Scrollable screens for smaller Android devices
+
+## Required Packages
+
+Install the stable React Navigation packages and their React Native dependencies:
+
+```text
+npm.cmd install @react-navigation/native @react-navigation/native-stack react-native-screens react-native-safe-area-context
 ```
 
-## Step 2: Build and run your app
+## Windows Setup Instructions
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+### 1. Create the React Native project
 
-### Android
+Open a Command Prompt or the VS Code terminal and enter each command separately:
 
-```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
+```text
+cd C:\RN
 ```
 
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
+```text
+npx.cmd @react-native-community/cli@latest init CourtConnect
 ```
 
-Then, and every time you update your native dependencies, run:
-
-```sh
-bundle exec pod install
+```text
+cd CourtConnect
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+### 2. Install React Navigation
 
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
+```text
+npm.cmd install @react-navigation/native @react-navigation/native-stack react-native-screens react-native-safe-area-context
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+### 3. Replace App.tsx
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+Copy the `App.tsx` file from this package into:
 
-## Step 3: Modify your app
+```text
+C:\RN\CourtConnect\App.tsx
+```
 
-Now that you have successfully run the app, let's make changes!
+Choose **Replace the file in the destination** if Windows asks.
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+### 4. Open the project in Visual Studio Code
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+```text
+code C:\RN\CourtConnect
+```
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+### 5. Run the application
 
-## Congratulations! :tada:
+Start the Android Emulator first. Close any older Metro terminal that is using port 8081, and then run:
 
-You've successfully run and modified your React Native App. :partying_face:
+```text
+cd C:\RN\CourtConnect
+```
 
-### Now what?
+```text
+npm.cmd run android
+```
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+Keep the Metro terminal open while using the application.
 
-# Troubleshooting
+## Testing and Screenshot Checklist
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+1. Take a screenshot of the Home screen before pressing any buttons.
+2. Press **Browse Courts** and take a screenshot showing the Court List screen.
+3. Select **Sunset Hoops Center** and take a screenshot of its Details screen.
+4. Return to Home, press **About CourtConnect**, and take a screenshot of the About screen.
+5. Verify that Android's Back button returns to the previous screen without an error.
 
-# Learn More
+## GitHub Submission
 
-To learn more about React Native, take a look at the following resources:
+After testing, create a public GitHub repository named `CMPS460-CourtConnect`, commit the complete React Native project, and submit its URL with the four screenshots and the written explanation.
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+## Note
+
+The court names and details are sample information created for this class project.

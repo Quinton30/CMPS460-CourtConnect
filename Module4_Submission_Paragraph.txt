@@ -1,0 +1,6 @@
+Quinton Alexandre
+CMPS 460 Mobile Application Development
+
+Module 4 Application Explanation
+
+CourtConnect is a multi-screen React Native application that helps users compare sample basketball courts. I selected this topic because basketball is an activity that interests me, and I wanted to design an application that could eventually help players find a court that matches the type of game or workout they want. The application uses stack navigation to move between the Home, Court List, Court Details, and About screens. When a user selects a court from the list, the application passes that court's information to the Details screen through navigation parameters so the correct name, neighborhood, surface, lighting, description, and amenities are displayed.
