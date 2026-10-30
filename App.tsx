@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   FlatList,
   Pressable,
@@ -36,12 +36,34 @@ interface SavedCourt {
   surface: string;
 }
 
+// Each forecast record displayed on the Court Weather screen uses this type.
+interface WeatherDay {
+  id: string;
+  date: string;
+  condition: string;
+  highTemperature: number;
+  lowTemperature: number;
+  rainChance: number;
+}
+
+// This type matches the daily portion of the Open-Meteo JSON response.
+interface WeatherApiResponse {
+  daily?: {
+    time: string[];
+    weather_code: number[];
+    temperature_2m_max: number[];
+    temperature_2m_min: number[];
+    precipitation_probability_max: number[];
+  };
+}
+
 type RootStackParamList = {
   Home: undefined;
   Courts: undefined;
   Details: {court: Court};
   SavedCourts: undefined;
   AddCourt: undefined;
+  Weather: undefined;
   About: undefined;
 };
 
@@ -56,6 +78,7 @@ type AddCourtNavigationProps = NativeStackScreenProps<
   RootStackParamList,
   'AddCourt'
 >;
+type WeatherProps = NativeStackScreenProps<RootStackParamList, 'Weather'>;
 type AboutProps = NativeStackScreenProps<RootStackParamList, 'About'>;
 
 type SavedCourtsScreenProps = SavedCourtsNavigationProps & {
@@ -69,6 +92,9 @@ type AddCourtScreenProps = AddCourtNavigationProps & {
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const STORAGE_KEY = '@courtconnect_saved_courts';
+const WEATHER_API_URL =
+  'https://api.open-meteo.com/v1/forecast?latitude=40.6782&longitude=-73.9442&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&temperature_unit=fahrenheit&timezone=America%2FNew_York';
+const TEST_ERROR_URL = 'https://api.open-meteo.com/v1/not-a-real-endpoint';
 
 // These three items appear the first time the application is opened.
 const STARTER_SAVED_COURTS: SavedCourt[] = [
@@ -190,6 +216,12 @@ function HomeScreen({navigation}: HomeProps): React.JSX.Element {
             style={styles.secondaryButton}
             onPress={() => navigation.navigate('AddCourt')}>
             <Text style={styles.secondaryButtonText}>Add a Court</Text>
+          </Pressable>
+
+          <Pressable
+            style={styles.secondaryButton}
+            onPress={() => navigation.navigate('Weather')}>
+            <Text style={styles.secondaryButtonText}>View Court Weather</Text>
           </Pressable>
 
           <Pressable
@@ -424,6 +456,201 @@ function AddCourtScreen({
   );
 }
 
+function weatherDescription(code: number): string {
+  if (code === 0) {
+    return 'Clear sky';
+  }
+  if (code === 1 || code === 2) {
+    return 'Partly cloudy';
+  }
+  if (code === 3) {
+    return 'Overcast';
+  }
+  if (code === 45 || code === 48) {
+    return 'Foggy';
+  }
+  if (code >= 51 && code <= 67) {
+    return 'Rain or drizzle';
+  }
+  if (code >= 71 && code <= 77) {
+    return 'Snow';
+  }
+  if (code >= 80 && code <= 82) {
+    return 'Rain showers';
+  }
+  if (code >= 85 && code <= 86) {
+    return 'Snow showers';
+  }
+  if (code >= 95) {
+    return 'Thunderstorms';
+  }
+  return 'Mixed conditions';
+}
+
+function formatForecastDate(date: string): string {
+  return new Date(`${date}T12:00:00`).toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
+function WeatherScreen({navigation}: WeatherProps): React.JSX.Element {
+  const [forecast, setForecast] = useState<WeatherDay[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  // Retrieve forecast records with fetch, async/await, and typed state.
+  const loadForecast = useCallback(async (simulateError = false) => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch(
+        simulateError ? TEST_ERROR_URL : WEATHER_API_URL,
+      );
+
+      if (!response.ok) {
+        throw new Error(`The weather service returned ${response.status}.`);
+      }
+
+      const data = (await response.json()) as WeatherApiResponse;
+      const daily = data.daily;
+
+      if (!daily || !Array.isArray(daily.time)) {
+        setForecast([]);
+        return;
+      }
+
+      const weatherDays: WeatherDay[] = daily.time.map((date, index) => ({
+        id: date,
+        date,
+        condition: weatherDescription(daily.weather_code[index]),
+        highTemperature: daily.temperature_2m_max[index],
+        lowTemperature: daily.temperature_2m_min[index],
+        rainChance: daily.precipitation_probability_max[index],
+      }));
+
+      setForecast(weatherDays);
+    } catch (requestError) {
+      setForecast([]);
+      setError(
+        requestError instanceof Error
+          ? requestError.message
+          : 'Unable to load the court forecast.',
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadForecast();
+  }, [loadForecast]);
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.centeredState} edges={['bottom']}>
+        <Text style={styles.stateTitle}>Loading court weather...</Text>
+        <Text style={styles.stateText}>
+          CourtConnect is requesting the latest Brooklyn forecast.
+        </Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={styles.centeredState} edges={['bottom']}>
+        <View style={styles.errorCard}>
+          <Text style={styles.errorStateTitle}>Weather unavailable</Text>
+          <Text style={styles.errorStateText}>{error}</Text>
+          <Text style={styles.errorStateText}>
+            Check the connection and try the request again.
+          </Text>
+          <Pressable
+            style={styles.primaryButton}
+            onPress={() => void loadForecast()}>
+            <Text style={styles.primaryButtonText}>Retry</Text>
+          </Pressable>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.safeArea} edges={['bottom']}>
+      <FlatList
+        data={forecast}
+        keyExtractor={item => item.id}
+        contentContainerStyle={styles.listContentGrow}
+        ListHeaderComponent={
+          <View style={styles.weatherHeader}>
+            <Text style={styles.screenTitle}>Brooklyn Court Weather</Text>
+            <Text style={styles.bodyText}>
+              Use the seven-day forecast to plan an outdoor basketball day.
+            </Text>
+            <View style={styles.weatherButtonRow}>
+              <Pressable
+                style={styles.smallRefreshButton}
+                onPress={() => void loadForecast()}>
+                <Text style={styles.smallRefreshButtonText}>Refresh</Text>
+              </Pressable>
+              <Pressable
+                style={styles.testErrorButton}
+                onPress={() => void loadForecast(true)}>
+                <Text style={styles.testErrorButtonText}>Test Error State</Text>
+              </Pressable>
+            </View>
+          </View>
+        }
+        ListEmptyComponent={
+          <View style={styles.emptyCard}>
+            <Text style={styles.emptyTitle}>No forecast records found</Text>
+            <Text style={styles.emptyText}>
+              Refresh the screen or return later to request forecast data.
+            </Text>
+            <Pressable
+              style={styles.primaryButton}
+              onPress={() => void loadForecast()}>
+              <Text style={styles.primaryButtonText}>Retry</Text>
+            </Pressable>
+          </View>
+        }
+        renderItem={({item}) => (
+          <View style={styles.weatherCard}>
+            <Text style={styles.weatherDate}>
+              {formatForecastDate(item.date)}
+            </Text>
+            <Text style={styles.weatherCondition}>{item.condition}</Text>
+            <View style={styles.weatherDetailsRow}>
+              <Text style={styles.weatherDetail}>
+                High: {Math.round(item.highTemperature)}°F
+              </Text>
+              <Text style={styles.weatherDetail}>
+                Low: {Math.round(item.lowTemperature)}°F
+              </Text>
+            </View>
+            <Text style={styles.rainText}>
+              Rain chance: {item.rainChance ?? 0}%
+            </Text>
+          </View>
+        )}
+        ListFooterComponent={
+          <View style={styles.apiCreditCard}>
+            <Text style={styles.apiCreditText}>
+              Weather data provided by Open-Meteo.
+            </Text>
+            <Pressable onPress={() => navigation.navigate('Home')}>
+              <Text style={styles.returnHomeText}>Return to Home</Text>
+            </Pressable>
+          </View>
+        }
+      />
+    </SafeAreaView>
+  );
+}
+
 function AboutScreen({navigation}: AboutProps): React.JSX.Element {
   return (
     <SafeAreaView style={styles.safeArea} edges={['bottom']}>
@@ -551,6 +778,11 @@ function App(): React.JSX.Element {
           <Stack.Screen name="AddCourt" options={{title: 'Add Court'}}>
             {props => <AddCourtScreen {...props} onAdd={addCourt} />}
           </Stack.Screen>
+          <Stack.Screen
+            name="Weather"
+            component={WeatherScreen}
+            options={{title: 'Court Weather'}}
+          />
           <Stack.Screen
             name="About"
             component={AboutScreen}
@@ -776,6 +1008,91 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: 'bold',
     marginBottom: 24,
+  },
+  centeredState: {
+    flex: 1,
+    backgroundColor: '#EDF4F7',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  stateTitle: {
+    color: '#123B56',
+    fontSize: 23,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  stateText: {
+    color: '#526775',
+    fontSize: 16,
+    lineHeight: 23,
+    textAlign: 'center',
+    marginTop: 9,
+  },
+  errorCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: '#E6A7A0',
+    padding: 22,
+  },
+  errorStateTitle: {
+    color: '#A32F25',
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  errorStateText: {
+    color: '#5F4643',
+    fontSize: 16,
+    lineHeight: 23,
+    marginBottom: 8,
+  },
+  weatherHeader: {marginBottom: 16},
+  weatherButtonRow: {flexDirection: 'row', gap: 10},
+  smallRefreshButton: {
+    flex: 1,
+    alignItems: 'center',
+    backgroundColor: '#147D8C',
+    borderRadius: 10,
+    paddingVertical: 11,
+  },
+  smallRefreshButtonText: {color: '#FFFFFF', fontSize: 14, fontWeight: 'bold'},
+  testErrorButton: {
+    flex: 1,
+    alignItems: 'center',
+    backgroundColor: '#FCE8E6',
+    borderWidth: 1,
+    borderColor: '#E6A7A0',
+    borderRadius: 10,
+    paddingVertical: 11,
+  },
+  testErrorButtonText: {color: '#A32F25', fontSize: 14, fontWeight: 'bold'},
+  weatherCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: '#C4D6E0',
+    marginBottom: 13,
+  },
+  weatherDate: {color: '#123B56', fontSize: 19, fontWeight: 'bold'},
+  weatherCondition: {
+    color: '#D66320',
+    fontSize: 17,
+    fontWeight: 'bold',
+    marginTop: 5,
+    marginBottom: 10,
+  },
+  weatherDetailsRow: {flexDirection: 'row', justifyContent: 'space-between'},
+  weatherDetail: {color: '#365362', fontSize: 16, fontWeight: 'bold'},
+  rainText: {color: '#526775', fontSize: 15, marginTop: 9},
+  apiCreditCard: {alignItems: 'center', paddingVertical: 13},
+  apiCreditText: {color: '#6A7B87', fontSize: 13},
+  returnHomeText: {
+    color: '#147D8C',
+    fontSize: 15,
+    fontWeight: 'bold',
+    marginTop: 10,
   },
 });
 

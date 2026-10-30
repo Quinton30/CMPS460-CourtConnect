@@ -1,98 +1,139 @@
-# CourtConnect - Module 5
+# CourtConnect - External API Integration
 
 **Student:** Quinton Alexandre  
 **Course:** CMPS 460 Mobile Application Development  
-**Assignment:** Module 5 Homework - Add Data & Persistent Storage
+**Assignment:** Integrate an External API
 
-## Application Description
+## Application Overview
 
-CourtConnect is a multi-screen React Native basketball court guide. The Module 5 version adds a personal saved-court collection. Users can view the collection in a FlatList, enter a new court through a validated form, delete an existing court, and return later to find their data still saved on the device.
+CourtConnect is a multi-screen React Native basketball court application. The API-powered Court Weather screen adds a seven-day Brooklyn forecast so users can decide which days are suitable for outdoor basketball. This screen is integrated into the existing semester application through React Navigation.
 
-## Module 5 Data Model
+## API Selection
 
-Each saved court follows the `SavedCourt` TypeScript interface and contains:
+**API:** Open-Meteo Weather Forecast API  
+**Authentication:** No API key is required for this educational, non-commercial project.  
+**Request method:** GET
 
-- `id` - a unique identifier
-- `name` - the court name
-- `neighborhood` - the court location
-- `surface` - the type of playing surface
-
-## Module 5 Requirements Met
-
-- TypeScript `SavedCourt` interface with four properties and a unique id
-- Collection stored as an array of TypeScript objects with `useState`
-- Collection displayed with `FlatList`
-- Court name, neighborhood, and surface displayed for every item
-- Add Court screen with three `TextInput` fields
-- Required-field validation and a visible error message
-- Delete button for every saved court
-- Empty-state message when the collection has no items
-- AsyncStorage loading when the app starts
-- AsyncStorage saving whenever the collection changes
-- `JSON.parse()` used while loading and `JSON.stringify()` used while saving
-- React Navigation integrated with the original multi-screen application
-- StyleSheet styling
-
-## Required Packages
-
-From the CourtConnect project folder, install AsyncStorage:
+**Endpoint:**
 
 ```text
-npm.cmd install @react-native-async-storage/async-storage
+https://api.open-meteo.com/v1/forecast?latitude=40.6782&longitude=-73.9442&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&temperature_unit=fahrenheit&timezone=America%2FNew_York
 ```
 
-The Module 4 navigation packages must also remain installed:
+The endpoint returns JSON forecast information for the Brooklyn coordinates used by CourtConnect. The application converts the daily arrays into typed `WeatherDay` records.
+
+Each displayed record contains:
+
+- Forecast date
+- Weather condition derived from the WMO weather code
+- Maximum temperature in Fahrenheit
+- Minimum temperature in Fahrenheit
+- Maximum precipitation probability
+
+This data supports CourtConnect by helping basketball players plan when to visit an outdoor court.
+
+## Technical Design
+
+- `fetch()` sends the external API request.
+- `async/await` handles the asynchronous response.
+- `WeatherApiResponse` describes the JSON returned by Open-Meteo.
+- `WeatherDay` describes each record stored in React state.
+- `useState<WeatherDay[]>` maintains the typed forecast collection.
+- `FlatList` displays the seven-day forecast.
+- A loading screen appears while the request is in progress.
+- An error screen appears when the request fails.
+- A Retry button repeats the valid request after an error.
+- An empty-state card appears if the response contains no daily records.
+- The Test Error State button requests an intentionally invalid Open-Meteo path so the required error and recovery behavior can be demonstrated reliably.
+
+## Setup Instructions
+
+This version continues the existing CourtConnect React Native project. No additional npm package is needed because `fetch()` is built into React Native.
+
+1. Copy the new `App.tsx` into:
 
 ```text
-npm.cmd install @react-navigation/native @react-navigation/native-stack react-native-screens react-native-safe-area-context
+C:\RN\CourtConnect
 ```
 
-## How to Use These Files
-
-1. Copy this `App.tsx` into `C:\RN\CourtConnect`.
-2. Choose **Replace the file in the destination** if Windows asks.
-3. Copy this `README.md` into the same folder and replace the older version.
+2. Replace the existing `App.tsx` when Windows asks.
+3. Copy this `README.md` into the same folder.
 4. Open `C:\RN\CourtConnect` in Visual Studio Code.
-5. Open a terminal in VS Code.
-6. Install AsyncStorage using the command above.
-7. Start the Android Emulator.
-8. Run the application:
+5. Start the Android Emulator.
+6. Open a PowerShell terminal in Visual Studio Code.
 
-```text
-npm.cmd run android
+If the Java environment variables are not available in the new terminal, run:
+
+```powershell
+$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
 ```
 
-## Testing Checklist
+```powershell
+$env:ANDROID_HOME = "$env:LOCALAPPDATA\Android\Sdk"
+```
 
-1. Open **Saved Courts** and confirm that three starter courts appear.
-2. Open **Add a Court**, leave a field blank, and press **Save Court** to confirm validation appears.
-3. Complete all three fields and press **Save Court**.
-4. Confirm that the new court appears in the list.
-5. Close and reopen the application and confirm the new court is still present.
-6. Delete one court and confirm it disappears.
+```powershell
+$env:Path = "$env:JAVA_HOME\bin;$env:ANDROID_HOME\platform-tools;$env:ANDROID_HOME\emulator;$env:Path"
+```
+
+7. Run the Android application:
+
+```powershell
+npm.cmd run android -- --port 8082
+```
+
+## Test Steps
+
+### Successful response
+
+1. Open CourtConnect.
+2. Scroll down on the Home screen.
+3. Press **View Court Weather**.
+4. Wait for the loading state to finish.
+5. Confirm that seven forecast cards appear.
+6. Confirm that every card shows a date, condition, high temperature, low temperature, and rain chance.
+7. Take the successful API response screenshot.
+
+### Error and recovery
+
+1. On the Court Weather screen, press **Test Error State**.
+2. Confirm that the Weather Unavailable screen appears.
+3. Take the required error-state screenshot while the Retry button is visible.
+4. Press **Retry**.
+5. Confirm that the valid forecast list appears again.
+
+### Empty state
+
+The `ListEmptyComponent` displays **No forecast records found** if a successful response contains no daily forecast records.
+
+## Design Decisions
+
+Weather was selected because it has a direct purpose within a basketball court application. A seven-day list is easier to understand than raw JSON and helps users compare several possible playing days. The screen uses the same blue, orange, and teal design as the rest of CourtConnect so the API feature feels like part of the existing application. The Retry and Test Error State controls make request recovery clear and allow the error requirement to be tested without waiting for an accidental network outage.
 
 ## Screenshot Checklist
 
-1. Take one screenshot of **My Saved Courts** showing the list.
-2. Take one screenshot of the **Add a Court** form.
-3. Add your own fourth court, return to **My Saved Courts**, and take a screenshot showing at least three stored items.
+1. Successful Court Weather screen with forecast records.
+2. Weather Unavailable screen with the Retry button visible.
+3. Optional recovery screenshot after pressing Retry.
 
-## GitHub Commands
+## GitHub Submission
 
-Run each command separately inside `C:\RN\CourtConnect`:
+After testing, run each command separately inside `C:\RN\CourtConnect`:
 
-```text
+```powershell
 git add .
 ```
 
-```text
-git commit -m "Complete CMPS 460 Module 5 persistent storage"
+```powershell
+git commit -m "Integrate Open-Meteo API into CourtConnect"
 ```
 
-```text
+```powershell
 git push
 ```
 
-## Submission Paragraph
+Submit the accessible CourtConnect GitHub repository URL, README, and screenshots through the LMS. Do not upload `node_modules`, private credentials, or generated Android build folders separately.
 
-CourtConnect stores a personal collection of basketball courts. Each saved court includes a unique identifier, court name, neighborhood, and playing surface. I selected this information because it gives basketball players the most useful details needed to recognize and compare locations. AsyncStorage saves the court array as a JSON string whenever the collection changes, and the application loads and parses that saved information when it starts. This allows added courts and deletions to remain after the application is closed and reopened.
+## Attribution
+
+Weather forecast data is provided by Open-Meteo under its published data-use terms.

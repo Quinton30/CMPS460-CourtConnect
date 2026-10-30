@@ -1,0 +1,7 @@
+Quinton Alexandre
+CMPS 460 Mobile Application Development
+Homework Assignment: Integrate an External API
+
+I selected the Open-Meteo Weather Forecast API for CourtConnect. The application makes a GET request to the public /v1/forecast endpoint using Brooklyn coordinates. The endpoint does not require a secret API key and returns daily JSON data including dates, weather codes, maximum temperatures, minimum temperatures, and precipitation probabilities. This information supports CourtConnect because basketball players can use the seven-day forecast to decide when outdoor court conditions may be suitable.
+
+The Court Weather screen uses fetch() with async/await to retrieve the response. A WeatherApiResponse interface represents the API response, and a WeatherDay interface represents the records stored in component state. A FlatList displays the date, readable weather condition, high temperature, low temperature, and rain chance for each day. The screen also includes loading, error, empty, Retry, refresh, and recovery behavior. It is integrated into the existing CourtConnect stack navigation instead of being created as a separate prototype.
