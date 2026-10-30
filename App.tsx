@@ -514,7 +514,7 @@ function App(): React.JSX.Element {
 
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle="light-content" backgroundColor="#123B56" />
+      <StatusBar barStyle="light-content" />
       <NavigationContainer>
         <Stack.Navigator
           initialRouteName="Home"
